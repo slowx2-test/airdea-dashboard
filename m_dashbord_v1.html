@@ -1,0 +1,1923 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1, viewport-fit=cover" />
+  <title>Airdea Smart Cold Chain (PWA Demo)</title>
+
+  <style>
+    /* =========================
+       ###-------- 모바일 PWA 데모 테마 --------###
+    ========================= */
+    :root{
+      --bg:#f2f1f9;
+      --panel:#ffffff;
+      --panel2:#fbfbff;
+      --line:#e7e8f4;
+      --txt:#1b1f2a;
+      --muted:#6b7186;
+      --muted2:#8b92a7;
+
+      --accent:#7c5cff;
+      --accent2:#5aa7ff;
+
+      --ok:#22c55e;
+      --warn:#f59e0b;
+      --bad:#ef4444;
+      --info:#3b82f6;
+
+      --okBg: rgba(34,197,94,.12);
+      --warnBg: rgba(245,158,11,.14);
+      --badBg: rgba(239,68,68,.14);
+      --infoBg: rgba(59,130,246,.12);
+
+      --shadow: 0 10px 26px rgba(25,28,55,.08);
+      --shadow2: 0 6px 16px rgba(25,28,55,.06);
+
+      --radius:16px;
+      --radius2:14px;
+
+      --safeTop: env(safe-area-inset-top, 0px);
+      --safeBottom: env(safe-area-inset-bottom, 0px);
+    }
+
+    *{ box-sizing:border-box; }
+    html,body{ height:100%; }
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Noto Sans KR", "Apple SD Gothic Neo", Arial, sans-serif;
+      color:var(--txt);
+      background: var(--bg);
+      overflow:hidden;
+    }
+
+    /* =========================
+       ###-------- 앱 레이아웃 --------###
+    ========================= */
+    .app{
+      height:100vh;
+      display:flex;
+      flex-direction:column;
+      padding-top: var(--safeTop);
+      padding-bottom: calc(66px + var(--safeBottom));
+    }
+
+    .top{
+      position:sticky;
+      top:0;
+      z-index:10;
+      padding:12px 12px 10px 12px;
+      background: linear-gradient(180deg, rgba(242,241,249,0.98), rgba(242,241,249,0.86));
+      backdrop-filter: blur(10px);
+    }
+
+    .titleRow{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:10px;
+    }
+
+    .appTitle{
+      display:flex;
+      flex-direction:column;
+      gap:4px;
+      min-width:0;
+    }
+    .appTitle h1{
+      margin:0;
+      font-size:14px;
+      letter-spacing:.2px;
+      line-height:1.2;
+    }
+    .appTitle .sub{
+      font-size:11px;
+      color:rgba(40,44,70,.65);
+      letter-spacing:.25px;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      max-width: 78vw;
+    }
+
+    .metaPills{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+      justify-content:flex-end;
+    }
+    .pill{
+      display:flex;
+      gap:8px;
+      align-items:center;
+      padding:6px 10px;
+      border-radius:999px;
+      border:1px solid #cfd1ea;
+      background: rgba(255,255,255,.92);
+      box-shadow: var(--shadow2);
+      font-size:12px;
+      color:rgba(40,44,70,.72);
+      white-space:nowrap;
+    }
+    .dot{
+      width:8px;height:8px;border-radius:999px;
+      background: var(--ok);
+      box-shadow: 0 0 0 4px rgba(34,197,94,.10);
+    }
+    .dot.warn{ background: var(--warn); box-shadow: 0 0 0 4px rgba(245,158,11,.12); }
+    .dot.bad{ background: var(--bad); box-shadow: 0 0 0 4px rgba(239,68,68,.12); }
+    .dot.info{ background: var(--info); box-shadow: 0 0 0 4px rgba(59,130,246,.12); }
+    .mono{
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      letter-spacing:.2px;
+      font-weight:800;
+      color:rgba(40,44,70,.92);
+    }
+
+    /* =========================
+       ###-------- 알람 배너 --------###
+    ========================= */
+    .alarmBar{
+      margin-top:10px;
+      border-radius: var(--radius);
+      border:1px solid var(--line);
+      background: var(--panel);
+      box-shadow: var(--shadow2);
+      padding:10px 12px;
+      display:flex;
+      gap:10px;
+      align-items:flex-start;
+      justify-content:space-between;
+    }
+    .alarmLeft{
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+      min-width:0;
+    }
+    .alarmTitle{
+      display:flex;
+      gap:8px;
+      align-items:center;
+      font-weight:900;
+      font-size:12px;
+      letter-spacing:.2px;
+    }
+    .alarmMsg{
+      font-size:12px;
+      color: var(--muted);
+      line-height:1.35;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      max-width: 70vw;
+    }
+    .alarmBtn{
+      border:none;
+      background: rgba(124,92,255,.10);
+      color: rgba(124,92,255,.95);
+      border:1px solid rgba(124,92,255,.18);
+      padding:8px 10px;
+      border-radius:12px;
+      font-weight:900;
+      cursor:pointer;
+      flex:0 0 auto;
+    }
+    .alarmBar.ok{ background: linear-gradient(180deg, #fff, var(--okBg)); border-color: rgba(34,197,94,.25); }
+    .alarmBar.warn{ background: linear-gradient(180deg, #fff, var(--warnBg)); border-color: rgba(245,158,11,.25); }
+    .alarmBar.bad{ background: linear-gradient(180deg, #fff, var(--badBg)); border-color: rgba(239,68,68,.25); }
+    .alarmBar.info{ background: linear-gradient(180deg, #fff, var(--infoBg)); border-color: rgba(59,130,246,.25); }
+
+    /* =========================
+       ###-------- 콘텐츠(페이지) --------###
+    ========================= */
+    .pages{
+      flex:1;
+      overflow:auto;
+      padding: 0 12px 12px 12px;
+    }
+    .page{
+      display:none;
+      flex-direction:column;
+      gap:12px;
+      padding-bottom: 10px;
+    }
+    .page.active{ display:flex; }
+
+    .section{
+      border-radius: var(--radius);
+      background: var(--panel);
+      border:1px solid var(--line);
+      box-shadow: var(--shadow);
+      overflow:hidden;
+    }
+    .sectionHead{
+      padding:12px 12px 10px 12px;
+      border-bottom:1px solid var(--line);
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:10px;
+      background:#fff;
+    }
+    .sectionHead .left{
+      display:flex;
+      flex-direction:column;
+      gap:4px;
+      min-width:0;
+    }
+    .sectionHead h2{
+      margin:0;
+      font-size:13px;
+      letter-spacing:.2px;
+    }
+    .sectionHead .desc{
+      font-size:11px;
+      color: var(--muted);
+      line-height:1.35;
+    }
+    .badge{
+      padding:6px 10px;
+      border-radius:999px;
+      font-size:11px;
+      font-weight:900;
+      border:1px solid var(--line);
+      background: #f6f6ff;
+      color: rgba(40,44,70,.78);
+      white-space:nowrap;
+      flex:0 0 auto;
+    }
+
+    .sectionBody{
+      padding:12px;
+      background: var(--panel2);
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+    }
+
+    .grid2{ display:grid; grid-template-columns: 1fr 1fr; gap:10px; }
+    .grid3{ display:grid; grid-template-columns: 1fr 1fr 1fr; gap:10px; }
+    @media (max-width: 420px){
+      .grid3{ grid-template-columns: 1fr; }
+      .grid2{ grid-template-columns: 1fr; }
+      .metaPills{ justify-content:flex-start; }
+      .alarmMsg{ max-width: 62vw; }
+    }
+
+    .card{
+      border-radius: var(--radius2);
+      border:1px solid var(--line);
+      background:#fff;
+      box-shadow: var(--shadow2);
+      padding:12px;
+      min-height:72px;
+      position:relative;
+    }
+    .card.state-ok{ border-color: rgba(34,197,94,.35); background: linear-gradient(180deg, #fff, var(--okBg)); }
+    .card.state-warn{ border-color: rgba(245,158,11,.40); background: linear-gradient(180deg, #fff, var(--warnBg)); }
+    .card.state-bad{ border-color: rgba(239,68,68,.40); background: linear-gradient(180deg, #fff, var(--badBg)); }
+    .card.state-info{ border-color: rgba(59,130,246,.40); background: linear-gradient(180deg, #fff, var(--infoBg)); }
+
+    .kpi{
+      color:#fff;
+      border-color: rgba(255,255,255,.36);
+      background: linear-gradient(135deg, rgba(124,92,255,.92), rgba(90,167,255,.70));
+    }
+    .kpi2{
+      color:#fff;
+      border-color: rgba(255,255,255,.36);
+      background: linear-gradient(135deg, rgba(196,60,255,.92), rgba(255,62,166,.72));
+    }
+    .kpi3{
+      color:#fff;
+      border-color: rgba(255,255,255,.36);
+      background: linear-gradient(135deg, rgba(18,194,123,.92), rgba(47,209,119,.72));
+    }
+    .kpi .label,.kpi2 .label,.kpi3 .label{ color:rgba(255,255,255,.92); }
+    .kpi .sub,.kpi2 .sub,.kpi3 .sub{ color:rgba(255,255,255,.86); }
+
+    .label{
+      font-size:11px;
+      color: var(--muted2);
+      letter-spacing:.2px;
+      font-weight:900;
+    }
+    .value{
+      margin-top:6px;
+      font-size:22px;
+      font-weight:900;
+      letter-spacing:.2px;
+    }
+    .unit{
+      font-size:12px;
+      color: var(--muted);
+      margin-left:6px;
+      font-weight:800;
+    }
+    .sub{
+      margin-top:6px;
+      font-size:11px;
+      color: var(--muted);
+      line-height:1.35;
+    }
+
+    .note{
+      padding:10px 12px;
+      border-radius: var(--radius2);
+      border:1px solid var(--line);
+      background:#fff;
+      box-shadow: var(--shadow2);
+      font-size:12px;
+      color: var(--muted);
+      line-height:1.45;
+    }
+    .note.ok{ border-color: rgba(34,197,94,.25); background: var(--okBg); color:#0f5132; }
+    .note.warn{ border-color: rgba(245,158,11,.25); background: var(--warnBg); color:#6a3b00; }
+    .note.bad{ border-color: rgba(239,68,68,.25); background: var(--badBg); color:#7a1020; }
+    .note.info{ border-color: rgba(59,130,246,.25); background: var(--infoBg); color:#0b3a73; }
+
+    .kv{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      padding:10px 12px;
+      border-radius: var(--radius2);
+      border:1px solid var(--line);
+      background:#f6f6ff;
+      font-size:12px;
+      color: var(--muted);
+    }
+    .kv b{ color: var(--txt); }
+
+    .bar{
+      height:10px;
+      border-radius:999px;
+      border:1px solid var(--line);
+      background: rgba(124,92,255,.10);
+      overflow:hidden;
+    }
+    .bar > div{
+      height:100%;
+      width:0%;
+      background: linear-gradient(90deg, rgba(124,92,255,.95), rgba(90,167,255,.78));
+      border-radius:999px;
+      transition: width .2s ease;
+    }
+
+    /* =========================
+       ###-------- 입력/버튼 --------###
+    ========================= */
+    .formRow{ display:grid; grid-template-columns: 1fr 1fr; gap:10px; }
+    @media (max-width: 420px){ .formRow{ grid-template-columns: 1fr; } }
+
+    .field{
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+    }
+    .field label{
+      font-size:11px;
+      color: var(--muted2);
+      font-weight:900;
+      letter-spacing:.2px;
+    }
+    input, select{
+      width:100%;
+      padding:10px 10px;
+      border-radius:12px;
+      border:1px solid var(--line);
+      background:#fff;
+      color: var(--txt);
+      outline:none;
+      font-size:14px;
+    }
+    input:focus, select:focus{
+      border-color: rgba(124,92,255,.55);
+      box-shadow: 0 0 0 3px rgba(124,92,255,.16);
+    }
+    .btnRow{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:10px;
+    }
+    .btn{
+      padding:12px 12px;
+      border-radius:14px;
+      border:1px solid rgba(124,92,255,.20);
+      background: rgba(124,92,255,.10);
+      color: rgba(124,92,255,.95);
+      font-weight:900;
+      cursor:pointer;
+    }
+    .btn.primary{
+      background: linear-gradient(135deg, rgba(124,92,255,.92), rgba(90,167,255,.72));
+      border-color: rgba(255,255,255,.30);
+      color:#fff;
+    }
+    .btn.danger{
+      background: rgba(239,68,68,.12);
+      border-color: rgba(239,68,68,.18);
+      color: rgba(160,20,40,.95);
+    }
+
+    /* =========================
+       ###-------- 하단 탭바 --------###
+    ========================= */
+    .tabbar{
+      position:fixed;
+      left:0; right:0; bottom:0;
+      padding-bottom: var(--safeBottom);
+      background: rgba(255,255,255,.92);
+      border-top:1px solid var(--line);
+      box-shadow: 0 -10px 26px rgba(25,28,55,.08);
+      z-index:20;
+    }
+    .tabs{
+      display:grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap:6px;
+      padding:10px 10px 12px 10px;
+    }
+    .tab{
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      gap:4px;
+      padding:10px 6px;
+      border-radius:14px;
+      border:1px solid transparent;
+      background: transparent;
+      cursor:pointer;
+      color: rgba(40,44,70,.78);
+      font-weight:900;
+      font-size:11px;
+      user-select:none;
+    }
+    .tab.active{
+      background: rgba(124,92,255,.10);
+      border-color: rgba(124,92,255,.18);
+      color: rgba(124,92,255,.95);
+    }
+    .tab small{
+      font-weight:800;
+      color: rgba(40,44,70,.55);
+    }
+    .tab.active small{ color: rgba(124,92,255,.88); }
+  </style>
+</head>
+
+<body>
+  <div class="app">
+    <div class="top">
+      <div class="titleRow">
+        <div class="appTitle">
+          <h1>Airdea 스마트 콜드체인 (PWA 테스트)</h1>
+          <div class="sub">상태/리스크/알람/제어 중심 5탭 데모 · 입력값 기반 시뮬레이션</div>
+        </div>
+
+        <div class="metaPills">
+          <div class="pill">Chamber <b class="mono" id="txtCh">CH-01</b></div>
+          <div class="pill">Updated <b class="mono" id="txtUpdated">--:--:--</b></div>
+          <div class="pill" id="pillRisk"><span class="dot info" id="dotRisk"></span> Risk <b class="mono" id="txtRisk">--</b></div>
+        </div>
+      </div>
+
+      <div class="alarmBar info" id="alarmBar">
+        <div class="alarmLeft">
+          <div class="alarmTitle"><span class="dot info" id="dotAlarm"></span><span id="alarmTitle">알람</span></div>
+          <div class="alarmMsg" id="alarmMsg">입력값을 바꾸면 알람/권고가 표시됩니다.</div>
+        </div>
+        <button class="alarmBtn" id="btnOpenControl">제어로</button>
+      </div>
+    </div>
+
+    <div class="pages">
+      <!-- =========================
+           ###-------- 홈 --------###
+      ========================= -->
+      <section class="page active" id="pageHome">
+        <div class="section">
+          <div class="sectionHead">
+            <div class="left">
+              <h2>홈(Home) · 운영 요약</h2>
+              <div class="desc">10초 판단: 종합 리스크 → 핵심 상태(온습도/VPD/CCI) → 한 줄 액션</div>
+            </div>
+            <span class="badge" id="badgeHome">--</span>
+          </div>
+
+          <div class="sectionBody">
+            <div class="grid2">
+              <div class="card kpi" id="cardRiskHome">
+                <div class="label">종합 리스크</div>
+                <div class="value"><span id="v_risk_total">--</span><span class="unit">/100</span></div>
+                <div class="sub" id="sub_risk">감모/습윤/후숙/고장/센서 품질 종합</div>
+              </div>
+              <div class="card kpi2" id="cardCciHome">
+                <div class="label">CCI (Crop Comfort Index)</div>
+                <div class="value"><span id="v_cci_total">--</span><span class="unit">/100</span></div>
+                <div class="sub" id="sub_cci">Env + Grade(SSI) + Learning</div>
+              </div>
+            </div>
+
+            <div class="grid3">
+              <div class="card kpi3" id="cardTemp">
+                <div class="label">온도</div>
+                <div class="value"><span id="v_t_air">--</span><span class="unit">°C</span></div>
+                <div class="sub">공기 온도(T_air)</div>
+              </div>
+              <div class="card kpi2" id="cardRh">
+                <div class="label">습도</div>
+                <div class="value"><span id="v_rh">--</span><span class="unit">%</span></div>
+                <div class="sub">상대습도(RH)</div>
+              </div>
+              <div class="card kpi" id="cardVpdState">
+                <div class="label">VPD 상태</div>
+                <div class="value" style="font-size:18px;"><span id="v_vpd_state">--</span></div>
+                <div class="sub"><span id="v_vpd_fruit">--</span> kPa (VPD_fruit)</div>
+              </div>
+            </div>
+
+            <div class="note" id="noteOneLine">한 줄 요약이 여기에 표시됩니다.</div>
+
+            <div class="grid2">
+              <div class="card">
+                <div class="label">잔여 저장 가능일(추정)</div>
+                <div class="value"><span id="v_remain_days">--</span><span class="unit">일</span></div>
+                <div class="sub" id="sub_remain">임계 감모율 도달 예상</div>
+              </div>
+              <div class="card">
+                <div class="label">권고 모드</div>
+                <div class="value" style="font-size:18px;"><span id="v_reco_mode">--</span></div>
+                <div class="sub" id="sub_reco">권고 출하 창/환경 조정 요약</div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="sectionHead">
+            <div class="left">
+              <h2>테스트 입력(핵심만)</h2>
+              <div class="desc">실제 연동 전, 현장 대표값으로 로직 반응/알람/권고 확인용</div>
+            </div>
+            <span class="badge">입력</span>
+          </div>
+
+          <div class="sectionBody">
+            <div class="formRow">
+              <div class="field">
+                <label>공기 온도(T_air, °C)</label>
+                <input id="in_t_air" type="number" step="0.1" value="2.0" />
+              </div>
+              <div class="field">
+                <label>습도(RH, %)</label>
+                <input id="in_rh" type="number" step="0.1" value="60.0" />
+              </div>
+            </div>
+
+            <div class="formRow">
+              <div class="field">
+                <label>표면 온도(T_fruit, °C)</label>
+                <input id="in_t_fruit" type="number" step="0.1" value="4.0" />
+              </div>
+              <div class="field">
+                <label>목표 VPD_fruit(Target, kPa)</label>
+                <input id="in_vpd_target" type="number" step="0.01" value="0.25" />
+              </div>
+            </div>
+
+            <div class="formRow">
+              <div class="field">
+                <label>VPD 밴드(하한,상한)</label>
+                <input id="in_vpd_band" type="text" value="0.20,0.35" />
+              </div>
+              <div class="field">
+                <label>AWG 모드</label>
+                <select id="in_awg_mode">
+                  <option value="AUTO" selected>AUTO</option>
+                  <option value="ON">ON</option>
+                  <option value="OFF">OFF</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="formRow">
+              <div class="field">
+                <label>Ethylene (ppm)</label>
+                <input id="in_eth" type="number" step="0.01" value="0.72" />
+              </div>
+              <div class="field">
+                <label>VOC Index</label>
+                <input id="in_voc" type="number" step="1" value="132" />
+              </div>
+            </div>
+
+            <div class="formRow">
+              <div class="field">
+                <label>CO₂ (ppm)</label>
+                <input id="in_co2" type="number" step="1" value="940" />
+              </div>
+              <div class="field">
+                <label>Sensor Health / Consistency (0~100)</label>
+                <div class="formRow" style="grid-template-columns:1fr 1fr;">
+                  <input id="in_health" type="number" step="1" value="95" />
+                  <input id="in_cons" type="number" step="1" value="95" />
+                </div>
+              </div>
+            </div>
+
+            <div class="btnRow">
+              <button class="btn primary" id="btnApplyHome">적용(Apply)</button>
+              <button class="btn" id="btnResetHome">기본값</button>
+            </div>
+
+            <div class="note info" id="noteHomeHint">
+              팁: VPD 밴드를 벗어나게 만들거나(E.g. RH 낮추기), Ethylene/VOC/CO₂를 동시에 올리면 “후숙/환기/출하” 권고가 바로 바뀝니다.
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- =========================
+           ###-------- 환경 --------###
+      ========================= -->
+      <section class="page" id="pageEnv">
+        <div class="section">
+          <div class="sectionHead">
+            <div class="left">
+              <h2>환경(Environment)</h2>
+              <div class="desc">VPD 게이지 + 감모 예측(단순 1차) · 목표 밴드 이탈 시 알람/권고 반영</div>
+            </div>
+            <span class="badge" id="badgeEnv">--</span>
+          </div>
+
+          <div class="sectionBody">
+            <div class="grid3">
+              <div class="card">
+                <div class="label">e_s(T_air)</div>
+                <div class="value"><span id="v_es_air">--</span><span class="unit">kPa</span></div>
+                <div class="sub">공기 포화수분압</div>
+              </div>
+              <div class="card">
+                <div class="label">e_a</div>
+                <div class="value"><span id="v_ea">--</span><span class="unit">kPa</span></div>
+                <div class="sub">실제 수분압</div>
+              </div>
+              <div class="card">
+                <div class="label">e_s(T_fruit)</div>
+                <div class="value"><span id="v_es_fruit">--</span><span class="unit">kPa</span></div>
+                <div class="sub">표면 포화수분압</div>
+              </div>
+            </div>
+
+            <div class="card" id="cardGauge">
+              <div class="label">VPD 게이지(VPD_fruit)</div>
+              <div class="sub" id="subGauge">목표 및 밴드 대비 상태를 한눈에 표시합니다.</div>
+              <div class="bar" style="margin-top:10px;">
+                <div id="barVpd"></div>
+              </div>
+              <div class="kv" style="margin-top:10px;">
+                <span>VPD_fruit / Band / Target</span>
+                <b><span id="v_vpd_fruit2">--</span> kPa · <span id="v_band2">--</span> · <span id="v_target2">--</span></b>
+              </div>
+            </div>
+
+            <div class="grid2">
+              <div class="card" id="cardLossDay">
+                <div class="label">일일 감모율(추정)</div>
+                <div class="value"><span id="v_loss_day">--</span><span class="unit">%/day</span></div>
+                <div class="sub">VPD 기반 단순 1차 모델</div>
+              </div>
+              <div class="card" id="cardRemain">
+                <div class="label">잔여 저장 가능일</div>
+                <div class="value"><span id="v_remain_days2">--</span><span class="unit">일</span></div>
+                <div class="sub" id="sub_remain2">임계 감모율 도달 예상</div>
+              </div>
+            </div>
+
+            <div class="grid2">
+              <div class="card" id="cardLoss7">
+                <div class="label">예상 감모(7일)</div>
+                <div class="value"><span id="v_loss_7">--</span><span class="unit">%</span></div>
+                <div class="sub" id="sub_loss7">임계 대비 편차</div>
+              </div>
+              <div class="card" id="cardLoss14">
+                <div class="label">예상 감모(14일)</div>
+                <div class="value"><span id="v_loss_14">--</span><span class="unit">%</span></div>
+                <div class="sub" id="sub_loss14">임계 대비 편차</div>
+              </div>
+            </div>
+
+            <div class="section" style="box-shadow:none;border:none;background:transparent;">
+              <div class="sectionBody" style="padding:0;background:transparent;">
+                <div class="note" id="noteEnv">환경 해석 메시지가 여기에 표시됩니다.</div>
+
+                <div class="formRow">
+                  <div class="field">
+                    <label>감모 임계값(%, 출하 전환 기준)</label>
+                    <input id="in_loss_limit" type="number" step="0.1" value="5.0" />
+                  </div>
+                  <div class="field">
+                    <label>감모 기본률 β (%/day)</label>
+                    <input id="in_beta_base" type="number" step="0.01" value="0.06" />
+                  </div>
+                </div>
+                <div class="formRow">
+                  <div class="field">
+                    <label>민감도 α (Dry)</label>
+                    <input id="in_alpha_dry" type="number" step="0.1" value="1.2" />
+                  </div>
+                  <div class="field">
+                    <label>설정온도(Setpoint, °C) (출하 램프에 사용)</label>
+                    <input id="in_setpoint" type="number" step="0.1" value="2.0" />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </section>
+
+      <!-- =========================
+           ###-------- 출하 --------###
+      ========================= -->
+      <section class="page" id="pageDispatch">
+        <div class="section">
+          <div class="sectionHead">
+            <div class="left">
+              <h2>출하(Dispatch)</h2>
+              <div class="desc">외기 기반 Tempering 램프 · 급변 방지(결로/쇼크 완화)</div>
+            </div>
+            <span class="badge" id="badgeDispatch">--</span>
+          </div>
+
+          <div class="sectionBody">
+            <div class="grid2">
+              <div class="card">
+                <div class="label">외기 온도(T_out)</div>
+                <div class="value"><span id="v_t_out">--</span><span class="unit">°C</span></div>
+                <div class="sub">수동 입력 기반</div>
+              </div>
+              <div class="card">
+                <div class="label">출하 목표 설정온도</div>
+                <div class="value"><span id="v_t_dispatch_set">--</span><span class="unit">°C</span></div>
+                <div class="sub">프리셋/ΔT 기반 산출</div>
+              </div>
+            </div>
+
+            <div class="card" id="cardRamp">
+              <div class="label">램프 진행</div>
+              <div class="sub" id="subRamp">출하 모드 ON 시 설정온도가 목표로 천천히 이동합니다.</div>
+              <div class="bar" style="margin-top:10px;"><div id="barDispatch"></div></div>
+              <div class="kv" style="margin-top:10px;">
+                <span>상태 / 진행률</span>
+                <b><span id="v_dispatch_state">OFF</span> · <span id="v_dispatch_pct">0</span>%</b>
+              </div>
+              <div class="kv">
+                <span>현재 Setpoint / Ramp rate</span>
+                <b><span id="v_setpoint_now">--</span> °C · <span id="v_ramp_rate">--</span> °C/h</b>
+              </div>
+              <div class="note" id="noteDispatch">출하 계획 메시지가 여기에 표시됩니다.</div>
+            </div>
+
+            <div class="section" style="box-shadow:none;border:none;background:transparent;">
+              <div class="sectionBody" style="padding:0;background:transparent;">
+                <div class="formRow">
+                  <div class="field">
+                    <label>외기 온도(T_out, °C)</label>
+                    <input id="in_t_out" type="number" step="0.1" value="10.0" />
+                  </div>
+                  <div class="field">
+                    <label>출하 소요시간(시간)</label>
+                    <select id="in_ship_hours">
+                      <option value="2">2</option>
+                      <option value="4" selected>4</option>
+                      <option value="6">6</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="formRow">
+                  <div class="field">
+                    <label>품목 프리셋</label>
+                    <select id="in_crop_preset">
+                      <option value="APPLE" selected>사과(Apple)</option>
+                      <option value="POTATO">감자(Potato)</option>
+                      <option value="GENERIC">기타(Generic)</option>
+                    </select>
+                  </div>
+                  <div class="field">
+                    <label>출하 모드(Dispatch Mode)</label>
+                    <select id="in_dispatch_enable">
+                      <option value="OFF" selected>OFF</option>
+                      <option value="ON">ON</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="btnRow">
+                  <button class="btn primary" id="btnDispatchApply">계획 적용(Apply)</button>
+                  <button class="btn danger" id="btnDispatchStop">출하 중지</button>
+                </div>
+
+                <div class="note info">
+                  테스트 팁: 출하 모드 ON 후, 홈/환경 탭에서도 Setpoint가 천천히 변하는 것을 확인할 수 있습니다.
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </section>
+
+      <!-- =========================
+           ###-------- 고장 --------###
+      ========================= -->
+      <section class="page" id="pageFault">
+        <div class="section">
+          <div class="sectionHead">
+            <div class="left">
+              <h2>고장/제상(Defrost & Fault)</h2>
+              <div class="desc">열화상 ROI 통계값 기반 데모(EFS/PRI) · 제상 필요/긴급/고장 의심 판정</div>
+            </div>
+            <span class="badge" id="badgeFault">--</span>
+          </div>
+
+          <div class="sectionBody">
+            <div class="grid2">
+              <div class="card" id="cardEfs">
+                <div class="label">EFS (결빙 전조)</div>
+                <div class="value"><span id="v_efs">--</span><span class="unit">/100</span></div>
+                <div class="sub">ColdArea%, σ(T), dColdArea</div>
+              </div>
+              <div class="card" id="cardPri">
+                <div class="label">PRI (성능 저하)</div>
+                <div class="value"><span id="v_pri">--</span><span class="unit">/100</span></div>
+                <div class="sub">CoolingRate, CycleDuration, Overshoot</div>
+              </div>
+            </div>
+
+            <div class="note" id="noteFault">고장/제상 메시지가 여기에 표시됩니다.</div>
+
+            <div class="section" style="box-shadow:none;border:none;background:transparent;">
+              <div class="sectionBody" style="padding:0;background:transparent;">
+                <div class="formRow">
+                  <div class="field">
+                    <label>ColdArea% (0~100)</label>
+                    <input id="in_coldArea" type="number" step="1" value="10" />
+                  </div>
+                  <div class="field">
+                    <label>σ(T) (°C)</label>
+                    <input id="in_sigmaT" type="number" step="0.1" value="0.8" />
+                  </div>
+                </div>
+
+                <div class="formRow">
+                  <div class="field">
+                    <label>dColdArea/10m (%)</label>
+                    <input id="in_dColdArea" type="number" step="0.1" value="1.0" />
+                  </div>
+                  <div class="field">
+                    <label>CoolingRate_now(10m) (°C/min)</label>
+                    <input id="in_coolingRate" type="number" step="0.001" value="0.080" />
+                  </div>
+                </div>
+
+                <div class="formRow">
+                  <div class="field">
+                    <label>CycleDuration(1°C) (min)</label>
+                    <input id="in_cycleDur" type="number" step="0.1" value="6.0" />
+                  </div>
+                  <div class="field">
+                    <label>TempOvershoot (°C)</label>
+                    <input id="in_overshoot" type="number" step="0.1" value="0.4" />
+                  </div>
+                </div>
+
+                <div class="btnRow">
+                  <button class="btn primary" id="btnRunDefrost">제상 실행(테스트)</button>
+                  <button class="btn" id="btnAckFault">알람 확인(ACK)</button>
+                </div>
+
+                <div class="note info" id="noteDefrostAction">
+                  테스트용 버튼입니다. 실제 장치 제상은 추후 API 연동(명령 전송)으로 바꿉니다.
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </section>
+
+      <!-- =========================
+           ###-------- 제어 --------###
+      ========================= -->
+      <section class="page" id="pageControl">
+        <div class="section">
+          <div class="sectionHead">
+            <div class="left">
+              <h2>제어(Control)</h2>
+              <div class="desc">최소 제어만 노출: 온도/AWG/환기/제상/출하 · 테스트는 “명령 로그”로 대체</div>
+            </div>
+            <span class="badge">제어</span>
+          </div>
+
+          <div class="sectionBody">
+            <div class="grid2">
+              <div class="card">
+                <div class="label">설정온도(Setpoint, °C)</div>
+                <div class="value"><span id="v_setpoint_view">--</span><span class="unit">°C</span></div>
+                <div class="sub">출하 램프 ON이면 자동으로 변합니다.</div>
+              </div>
+              <div class="card">
+                <div class="label">AWG 모드</div>
+                <div class="value" style="font-size:18px;"><span id="v_awg_mode_view">--</span></div>
+                <div class="sub">AUTO/ON/OFF</div>
+              </div>
+            </div>
+
+            <div class="section" style="box-shadow:none;border:none;background:transparent;">
+              <div class="sectionBody" style="padding:0;background:transparent;">
+                <div class="formRow">
+                  <div class="field">
+                    <label>Setpoint 변경(테스트)</label>
+                    <input id="ctl_setpoint" type="number" step="0.1" value="2.0" />
+                  </div>
+                  <div class="field">
+                    <label>AWG 모드 변경(테스트)</label>
+                    <select id="ctl_awg">
+                      <option value="AUTO" selected>AUTO</option>
+                      <option value="ON">ON</option>
+                      <option value="OFF">OFF</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="btnRow">
+                  <button class="btn primary" id="btnCtlApply">제어 적용(테스트)</button>
+                  <button class="btn" id="btnVent">환기 실행(테스트)</button>
+                </div>
+
+                <div class="btnRow">
+                  <button class="btn danger" id="btnDefrost">제상 실행(테스트)</button>
+                  <button class="btn" id="btnClearLog">로그 지우기</button>
+                </div>
+
+                <div class="note" id="noteControl">
+                  제어 로그가 여기에 쌓입니다.
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </section>
+
+      <!-- 알람 상세(모달 대체: 페이지 하단 섹션) -->
+      <section class="section" id="alarmDetail" style="margin-top:12px;">
+        <div class="sectionHead">
+          <div class="left">
+            <h2>알람 목록(최근 10개)</h2>
+            <div class="desc">임계 초과/권고 변경/제상 필요 등 이벤트를 기록합니다.</div>
+          </div>
+          <span class="badge" id="badgeAlarmCount">0</span>
+        </div>
+        <div class="sectionBody">
+          <div class="note" id="alarmList">알람이 아직 없습니다.</div>
+        </div>
+      </section>
+    </div>
+
+    <!-- 하단 탭바 -->
+    <div class="tabbar">
+      <div class="tabs">
+        <div class="tab active" data-tab="Home">
+          홈
+          <small>요약</small>
+        </div>
+        <div class="tab" data-tab="Env">
+          환경
+          <small>VPD</small>
+        </div>
+        <div class="tab" data-tab="Dispatch">
+          출하
+          <small>램프</small>
+        </div>
+        <div class="tab" data-tab="Fault">
+          고장
+          <small>제상</small>
+        </div>
+        <div class="tab" data-tab="Control">
+          제어
+          <small>조작</small>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    /* =========================
+       ###-------- 유틸 --------###
+    ========================= */
+    function clamp(x,a,b){ return Math.max(a, Math.min(b, x)); }
+    function num(v,f=0){
+      const x = parseFloat(v);
+      return Number.isFinite(x) ? x : f;
+    }
+    function nowTimeString(){
+      const d = new Date();
+      const hh = String(d.getHours()).padStart(2,"0");
+      const mm = String(d.getMinutes()).padStart(2,"0");
+      const ss = String(d.getSeconds()).padStart(2,"0");
+      return `${hh}:${mm}:${ss}`;
+    }
+    function parseBand(text){
+      const parts = String(text).split(",").map(s => parseFloat(s.trim())).filter(v => Number.isFinite(v));
+      if(parts.length >= 2){
+        const lo = Math.min(parts[0], parts[1]);
+        const hi = Math.max(parts[0], parts[1]);
+        return {lo, hi};
+      }
+      return {lo:0.20, hi:0.35};
+    }
+    function setDot(dotEl, level){
+      dotEl.className = "dot";
+      if(level === "WARN") dotEl.classList.add("warn");
+      else if(level === "BAD") dotEl.classList.add("bad");
+      else if(level === "INFO") dotEl.classList.add("info");
+    }
+    function setNote(noteEl, level, text){
+      noteEl.className = "note";
+      if(level === "OK") noteEl.classList.add("ok");
+      if(level === "WARN") noteEl.classList.add("warn");
+      if(level === "BAD") noteEl.classList.add("bad");
+      if(level === "INFO") noteEl.classList.add("info");
+      noteEl.textContent = text;
+    }
+    function setCardState(cardEl, level){
+      cardEl.classList.remove("state-ok","state-warn","state-bad","state-info");
+      if(level === "OK") cardEl.classList.add("state-ok");
+      else if(level === "WARN") cardEl.classList.add("state-warn");
+      else if(level === "BAD") cardEl.classList.add("state-bad");
+      else if(level === "INFO") cardEl.classList.add("state-info");
+    }
+
+    /* =========================
+       ###-------- 핵심 계산: VPD --------###
+       e_s(T)=0.6108·exp(17.27T/(T+237.3)) [kPa]
+       e_a = RH/100 × e_s(T_air)
+       VPD_fruit = e_s(T_fruit) - e_a
+    ========================= */
+    function satVaporPressure_kPa(T){
+      return 0.6108 * Math.exp((17.27 * T) / (T + 237.3));
+    }
+
+    /* =========================
+       ###-------- 교차진단 --------###
+    ========================= */
+    function crossDiagnosis(eth, voc, co2, vpdFruit, band, health, cons){
+      if(health < 70 || cons < 70){
+        return { state:"Sensor Quality Low", level:"WARN",
+          msg:"Sensor Health/Consistency가 낮아 오탐 가능성이 큽니다. 센서 점검/교정 후 판단하세요." };
+      }
+      if(eth > 1.5 && voc > 200 && co2 > 1200){
+        return { state:"Ripening Active", level:"BAD",
+          msg:"Ethylene/VOC/CO₂ 동반 상승 → 후숙/대사 가속 가능성 큼. 단기 출하 우선 + 환기/CO₂ 관리 필요." };
+      }
+      if(eth > 1.5 && voc < 150 && co2 < 1000){
+        return { state:"Sensor Drift", level:"WARN",
+          msg:"Ethylene 단독 상승 → 센서 드리프트/간섭 가능성. 재교정 또는 교차 샘플링 권장." };
+      }
+      if(co2 > 1500 && vpdFruit >= band.lo && vpdFruit <= band.hi){
+        return { state:"Ventilation Required", level:"INFO",
+          msg:"CO₂ 축적 → 환기 필요. VPD는 정상이라 결빙보단 환기 이슈 가능성." };
+      }
+      if(vpdFruit > band.hi){
+        return { state:"Dry Risk", level:"WARN",
+          msg:"VPD_fruit 상한 초과(건조) → 감모 리스크 증가. RH 상향(AWG) 또는 출하 램프 완화 권장." };
+      }
+      if(vpdFruit < band.lo){
+        return { state:"Wet Risk", level:"WARN",
+          msg:"VPD_fruit 하한 미만(습함) → 결로/습윤 리스크. 환기/Tempering/제상 타이밍 점검 권장." };
+      }
+      return { state:"Stable", level:"OK",
+        msg:"이상 징후가 낮습니다. 현재 조건 기반 저장 유지 가능." };
+    }
+
+    /* =========================
+       ###-------- SSI/CCI(설명형) --------###
+    ========================= */
+    function computeSSI(eth, voc, co2, vpdFruit, band, diagLevel){
+      const ethScore = clamp((eth / 2.0) * 100, 0, 100);
+      const vocScore = clamp((voc / 300.0) * 100, 0, 100);
+      const co2Score = clamp(((co2 - 400) / 1600.0) * 100, 0, 100);
+      const vpdScore = clamp(((vpdFruit - band.hi) / 0.25) * 100, 0, 100);
+
+      const diagBoost =
+        (diagLevel === "BAD") ? 15 :
+        (diagLevel === "WARN") ? 8 :
+        (diagLevel === "INFO") ? 4 : 0;
+
+      const ssi = 0.35*ethScore + 0.25*vocScore + 0.15*co2Score + 0.25*vpdScore + diagBoost;
+      return clamp(ssi, 0, 100);
+    }
+    function computeCCI(vpdFruit, band, ssi, learning){
+      const mid = (band.lo + band.hi)/2;
+      const half = Math.max(0.05, (band.hi - band.lo)/2);
+      const dist = Math.abs(vpdFruit - mid);
+      const env = clamp(90 - (dist/half)*40, 0, 100);
+      const grade = clamp(95 - ssi * 0.75, 0, 100);
+      const learn = clamp(learning, 0, 100);
+      const total = clamp(0.45*env + 0.40*grade + 0.15*learn, 0, 100);
+      return {total, env, grade, learn};
+    }
+    function cciLabel(v){
+      if(v >= 80) return {txt:"Excellent", level:"OK"};
+      if(v >= 65) return {txt:"Good", level:"OK"};
+      if(v >= 50) return {txt:"Fair", level:"WARN"};
+      return {txt:"Poor", level:"BAD"};
+    }
+
+    /* =========================
+       ###-------- 감모/잔여일(단순 1차) --------###
+    ========================= */
+    function estimateLossDayPercent(vpdFruit, vpdTarget, betaBase, alphaDry){
+      const dryGap = Math.max(0, vpdFruit - vpdTarget);
+      const loss = betaBase + alphaDry * dryGap * 0.10;
+      return clamp(loss, 0.01, 1.50);
+    }
+    function estimateLossNDays(lossDay, days){
+      return clamp(lossDay * days, 0, 50);
+    }
+    function estimateRemainingDays(lossLimit, lossDay){
+      if(lossDay <= 0.0001) return 999;
+      return clamp(lossLimit / lossDay, 0, 999);
+    }
+
+    /* =========================
+       ###-------- 제상/고장(데모) --------###
+    ========================= */
+    function computeEFS(coldAreaPct, sigmaT, dColdArea10m){
+      const ca = clamp(coldAreaPct / 40.0, 0, 1);
+      const sg = clamp(sigmaT / 3.0, 0, 1);
+      const dca = clamp(dColdArea10m / 10.0, 0, 1);
+      const efs = 100*(0.40*ca + 0.30*sg + 0.30*dca);
+      return clamp(efs, 0, 100);
+    }
+    function computePRI(coolingRate, cycleDur, overshoot){
+      const coolingLoss = clamp((0.12 - coolingRate) / 0.08, 0, 1);
+      const cycleAnom = clamp((cycleDur - 5.0) / 8.0, 0, 1);
+      const overAnom = clamp((overshoot - 0.5) / 2.0, 0, 1);
+      const pri = 100*(0.50*coolingLoss + 0.25*cycleAnom + 0.25*overAnom);
+      return clamp(pri, 0, 100);
+    }
+    function judgeFault(efs, pri){
+      if(efs >= 70 && pri >= 60){
+        return {state:"Defrost Urgent", level:"BAD", msg:"결빙 전조(EFS) + 성능 저하(PRI) 동시 증가 → 즉시 제상/점검 권장."};
+      }
+      if(efs >= 70 && pri >= 30){
+        return {state:"Defrost Needed", level:"WARN", msg:"결빙 전조가 뚜렷 → 제상 실행 시점(성능 저하는 초기)."};
+      }
+      if(efs < 40 && pri >= 60){
+        return {state:"Fault Suspect", level:"BAD", msg:"결빙 전조는 약한데 성능 저하가 큼 → 냉매/팬/밸브/필터/압축기 점검."};
+      }
+      if(efs >= 40 && pri >= 30){
+        return {state:"Watch", level:"WARN", msg:"결빙/성능 변화 관측 → 추세 모니터링 후 임계 도달 시 제상/점검."};
+      }
+      return {state:"Normal", level:"OK", msg:"제상/고장 징후가 낮습니다."};
+    }
+
+    /* =========================
+       ###-------- 출하 램프(데모) --------###
+    ========================= */
+    const Dispatch = {
+      enabled:false,
+      state:"OFF",
+      T_out:null,
+      shipHours:4,
+      cropPreset:"APPLE",
+      T_storage_set:2.0,
+      T_dispatch_set:2.0,
+      rampRate_C_per_hr:0.7,
+      progress01:0,
+      note:""
+    };
+
+    function computeDeltaUp(T_out, T_storage_set, cropPreset){
+      const deltaT = T_out - T_storage_set;
+      let up;
+      if(deltaT < 5) up = 1;
+      else if(deltaT < 10) up = 2;
+      else if(deltaT < 15) up = 3;
+      else up = 4;
+
+      if(cropPreset === "POTATO") up = Math.min(up + 1, 5);
+      else if(cropPreset === "GENERIC") up = Math.min(up, 4);
+      return up;
+    }
+    function computeDispatchMaxTemp(cropPreset){
+      if(cropPreset === "APPLE") return 6.0;
+      if(cropPreset === "POTATO") return 8.0;
+      return 7.0;
+    }
+    function computeRampRate(shipHours){
+      const h = Number(shipHours);
+      let r;
+      if(h <= 2) r = 1.0;
+      else if(h <= 4) r = 0.7;
+      else r = 0.5;
+      return clamp(r, 0.3, 1.2);
+    }
+    function startOrUpdateDispatchPlan(){
+      const tOut = num(document.getElementById("in_t_out").value, NaN);
+      const shipHours = num(document.getElementById("in_ship_hours").value, 4);
+      const cropPreset = document.getElementById("in_crop_preset").value;
+      const tStorageSet = num(document.getElementById("in_setpoint").value, 2.0);
+
+      if(!Number.isFinite(tOut) || tOut < -20 || tOut > 45){
+        Dispatch.note = "외기 온도 입력값이 범위를 벗어났습니다(-20~45°C).";
+        Dispatch.enabled = false;
+        Dispatch.state = "OFF";
+        Dispatch.T_out = null;
+        return;
+      }
+
+      Dispatch.T_out = tOut;
+      Dispatch.shipHours = shipHours;
+      Dispatch.cropPreset = cropPreset;
+      Dispatch.T_storage_set = tStorageSet;
+
+      const up = computeDeltaUp(tOut, tStorageSet, cropPreset);
+      const tMax = computeDispatchMaxTemp(cropPreset);
+      const tTarget = clamp(tStorageSet + up, tStorageSet, tMax);
+
+      Dispatch.T_dispatch_set = tTarget;
+      Dispatch.rampRate_C_per_hr = computeRampRate(shipHours);
+      Dispatch.note = `ΔT=${(tOut - tStorageSet).toFixed(1)}°C → 상승폭 +${up}°C, 목표 ${tTarget.toFixed(1)}°C, 램프 ${Dispatch.rampRate_C_per_hr.toFixed(2)}°C/h`;
+      Dispatch.state = "ARMED";
+      Dispatch.progress01 = 0;
+    }
+    function stopDispatch(){
+      Dispatch.enabled = false;
+      Dispatch.state = "STOPPED";
+      Dispatch.progress01 = 0;
+      Dispatch.note = "출하 모드를 중지했습니다. 저장 모드 설정온도를 유지하세요.";
+    }
+    function tickDispatch(){
+      const enable = document.getElementById("in_dispatch_enable").value === "ON";
+      if(!enable){
+        if(Dispatch.state !== "OFF" && Dispatch.state !== "STOPPED"){
+          Dispatch.state = "OFF";
+          Dispatch.enabled = false;
+          Dispatch.progress01 = 0;
+        }
+        return;
+      }
+
+      if(Dispatch.state === "OFF" || Dispatch.state === "STOPPED"){
+        startOrUpdateDispatchPlan();
+      }
+      Dispatch.enabled = true;
+
+      const tSetEl = document.getElementById("in_setpoint");
+      let currentSet = num(tSetEl.value, Dispatch.T_storage_set);
+      const target = Dispatch.T_dispatch_set;
+      const stepPerSec = Dispatch.rampRate_C_per_hr / 3600.0;
+
+      if(Math.abs(target - currentSet) < 0.05){
+        Dispatch.state = "HOLD";
+        Dispatch.progress01 = 1;
+        tSetEl.value = target.toFixed(1);
+        return;
+      }
+
+      Dispatch.state = "RAMP";
+      const next = (currentSet < target) ? (currentSet + stepPerSec) : (currentSet - stepPerSec);
+      const clampedSet = (currentSet < target) ? Math.min(next, target) : Math.max(next, target);
+
+      tSetEl.value = clampedSet.toFixed(1);
+
+      const denom = Math.max(0.1, (target - Dispatch.T_storage_set));
+      const prog = (clampedSet - Dispatch.T_storage_set) / denom;
+      Dispatch.progress01 = clamp(prog, 0, 1);
+    }
+
+    /* =========================
+       ###-------- 리스크 스코어(0~100) --------###
+    ========================= */
+    function computeRiskScore(diag, vpdFruit, band, lossDay, lossLimit, efs, pri, health, cons){
+      const lossRatio = clamp(lossDay / Math.max(0.01, (lossLimit/30.0)), 0, 3);
+      const riskLoss = clamp(20 + 25*(lossRatio-1), 0, 100);
+
+      const wetGap = Math.max(0, band.lo - vpdFruit);
+      const riskWet = clamp(wetGap / 0.15 * 100, 0, 100);
+
+      const riskRipen =
+        (diag.level === "BAD") ? 90 :
+        (diag.level === "WARN") ? 60 :
+        (diag.level === "INFO") ? 40 : 20;
+
+      const riskFault = clamp(0.55*efs + 0.45*pri, 0, 100);
+
+      const q = (health + cons)/2.0;
+      const riskSensor = clamp(100 - q, 0, 100);
+
+      const total = clamp(
+        0.30*riskLoss +
+        0.15*riskWet +
+        0.25*riskRipen +
+        0.20*riskFault +
+        0.10*riskSensor,
+        0, 100
+      );
+
+      return { total, breakdown: {riskLoss, riskWet, riskRipen, riskFault, riskSensor} };
+    }
+    function riskLabel(score){
+      if(score < 35) return {txt:"Low", level:"OK"};
+      if(score < 60) return {txt:"Moderate", level:"WARN"};
+      return {txt:"High", level:"BAD"};
+    }
+
+    /* =========================
+       ###-------- 전략 권고(앱용 단순화) --------###
+       - 앱에서는 숫자보다 “상태/행동” 중심으로 요약
+    ========================= */
+    function recommendSimple(diag, vpdFruit, band, remainDays, faultLevel){
+      // 기본
+      let mode = "STORAGE";
+      let oneLine = "저장 안정 구간. 7일 단위 재평가 권장.";
+      let level = "OK";
+
+      // 센서 품질
+      if(diag.state === "Sensor Quality Low"){
+        mode = "CHECK";
+        oneLine = "센서 신뢰도 낮음. 센서 점검/교정 후 판단 권장.";
+        level = "WARN";
+        return {mode, oneLine, level};
+      }
+
+      // 후숙 활성
+      if(diag.state === "Ripening Active"){
+        mode = "FAST DISPATCH";
+        oneLine = "후숙/대사 가속 신호. 즉시~3일 내 출하 우선 + 환기/CO₂ 관리.";
+        level = "BAD";
+        return {mode, oneLine, level};
+      }
+
+      // 고장/제상 우선
+      if(faultLevel === "BAD"){
+        mode = "MAINTENANCE";
+        oneLine = "고장/성능 저하 의심. 즉시 점검 또는 제상/부품 상태 확인.";
+        level = "BAD";
+        return {mode, oneLine, level};
+      }
+      if(faultLevel === "WARN"){
+        mode = "DEFROST WATCH";
+        oneLine = "결빙/성능 변화 관측. 추세 모니터링 후 제상 타이밍 확보.";
+        level = "WARN";
+      }
+
+      // VPD 이탈
+      if(vpdFruit > band.hi){
+        mode = "DRY MITIGATION";
+        oneLine = (remainDays <= 10)
+          ? "건조 리스크 + 잔여일 짧음. 10일 이내 출하 또는 RH 상향(AWG) 권장."
+          : "건조 구간. RH 상향(AWG)로 밴드 복귀 후 재평가 권장.";
+        level = "WARN";
+        return {mode, oneLine, level};
+      }
+      if(vpdFruit < band.lo){
+        mode = "WET MITIGATION";
+        oneLine = "습윤/결로 리스크. 환기/Tempering/제상 타이밍 점검 후 재평가.";
+        level = "WARN";
+        return {mode, oneLine, level};
+      }
+
+      // CO2 환기
+      if(diag.state === "Ventilation Required"){
+        mode = "VENTILATION";
+        oneLine = "CO₂ 축적. 환기/댐퍼/필터/팬 상태 점검 및 환기 실행 권장.";
+        level = "INFO";
+        return {mode, oneLine, level};
+      }
+
+      // 잔여일 경고
+      if(remainDays < 10){
+        mode = "ROTATION";
+        oneLine = "감모 임계 접근. 단기 회전(출하) 계획 수립 권장.";
+        level = "WARN";
+        return {mode, oneLine, level};
+      }
+
+      return {mode, oneLine, level};
+    }
+
+    /* =========================
+       ###-------- 알람 기록 --------###
+    ========================= */
+    const Alarm = {
+      list: [],
+      ackFaultTs: 0
+    };
+
+    function pushAlarm(level, title, msg){
+      const ts = new Date().toLocaleString("ko-KR");
+      const item = {ts, level, title, msg};
+      Alarm.list.unshift(item);
+      Alarm.list = Alarm.list.slice(0, 10);
+      renderAlarmList();
+      setAlarmBar(level, title, msg);
+    }
+
+    function renderAlarmList(){
+      const el = document.getElementById("alarmList");
+      const badge = document.getElementById("badgeAlarmCount");
+      badge.textContent = String(Alarm.list.length);
+
+      if(Alarm.list.length === 0){
+        el.textContent = "알람이 아직 없습니다.";
+        return;
+      }
+      const lines = Alarm.list.map(a => `[${a.ts}] (${a.level}) ${a.title} - ${a.msg}`);
+      el.textContent = lines.join("\n");
+    }
+
+    function setAlarmBar(level, title, msg){
+      const bar = document.getElementById("alarmBar");
+      bar.classList.remove("ok","warn","bad","info");
+      if(level === "OK") bar.classList.add("ok");
+      if(level === "WARN") bar.classList.add("warn");
+      if(level === "BAD") bar.classList.add("bad");
+      if(level === "INFO") bar.classList.add("info");
+
+      document.getElementById("alarmTitle").textContent = title;
+      document.getElementById("alarmMsg").textContent = msg;
+      setDot(document.getElementById("dotAlarm"), level);
+    }
+
+    /* =========================
+       ###-------- 상태 저장(옵션) --------###
+    ========================= */
+    const KEY = "airdea_pwa_demo_state_v1";
+    function saveState(){
+      const ids = [
+        "in_t_air","in_rh","in_t_fruit","in_vpd_target","in_vpd_band","in_awg_mode",
+        "in_eth","in_voc","in_co2","in_health","in_cons",
+        "in_loss_limit","in_beta_base","in_alpha_dry","in_setpoint",
+        "in_t_out","in_ship_hours","in_crop_preset","in_dispatch_enable",
+        "in_coldArea","in_sigmaT","in_dColdArea","in_coolingRate","in_cycleDur","in_overshoot",
+        "ctl_setpoint","ctl_awg"
+      ];
+      const data = {};
+      ids.forEach(id => {
+        const el = document.getElementById(id);
+        if(!el) return;
+        data[id] = el.value;
+      });
+      localStorage.setItem(KEY, JSON.stringify(data));
+    }
+    function loadState(){
+      try{
+        const raw = localStorage.getItem(KEY);
+        if(!raw) return;
+        const data = JSON.parse(raw);
+        Object.keys(data).forEach(id => {
+          const el = document.getElementById(id);
+          if(el) el.value = data[id];
+        });
+      }catch(e){}
+    }
+
+    /* =========================
+       ###-------- 메인 업데이트 --------###
+    ========================= */
+    let prevKey = "";
+
+    function updateUI(){
+      document.getElementById("txtUpdated").textContent = nowTimeString();
+
+      // 출하 램프 틱
+      tickDispatch();
+
+      const T_air = num(document.getElementById("in_t_air").value, 2.0);
+      let RH = num(document.getElementById("in_rh").value, 60.0);
+      const T_fruit = num(document.getElementById("in_t_fruit").value, 4.0);
+      const vpdTarget = num(document.getElementById("in_vpd_target").value, 0.25);
+      const band = parseBand(document.getElementById("in_vpd_band").value);
+      const awgMode = document.getElementById("in_awg_mode").value;
+
+      // AWG 데모 반영(표시용 간단 보정)
+      // AUTO: 건조이면 RH +5%p / 습윤이면 RH -3%p / 그 외 유지
+      // ON: RH +8%p / OFF: 유지
+      if(awgMode === "AUTO"){
+        // vpd 계산 후 적용해야 자연스럽지만, 데모에서는 1회 근사로 처리
+      }else if(awgMode === "ON"){
+        RH = clamp(RH + 8.0, 0, 100);
+      }else{
+        RH = clamp(RH, 0, 100);
+      }
+
+      const eth = num(document.getElementById("in_eth").value, 0.72);
+      const voc = num(document.getElementById("in_voc").value, 132);
+      const co2 = num(document.getElementById("in_co2").value, 940);
+      const health = clamp(num(document.getElementById("in_health").value, 95), 0, 100);
+      const cons = clamp(num(document.getElementById("in_cons").value, 95), 0, 100);
+
+      const lossLimit = clamp(num(document.getElementById("in_loss_limit").value, 5.0), 0.5, 30.0);
+      const betaBase = clamp(num(document.getElementById("in_beta_base").value, 0.06), 0.0, 1.5);
+      const alphaDry = clamp(num(document.getElementById("in_alpha_dry").value, 1.2), 0.0, 10.0);
+
+      // VPD
+      const es_air = satVaporPressure_kPa(T_air);
+      const ea = (RH/100.0) * es_air;
+      const es_fruit = satVaporPressure_kPa(T_fruit);
+      const vpd_fruit = Math.max(0, es_fruit - ea);
+
+      // AWG AUTO 데모(2차 보정)
+      if(awgMode === "AUTO"){
+        if(vpd_fruit > band.hi) RH = clamp(RH + 5.0, 0, 100);
+        else if(vpd_fruit < band.lo) RH = clamp(RH - 3.0, 0, 100);
+      }
+
+      // 보정된 RH로 다시 계산
+      const ea2 = (RH/100.0) * es_air;
+      const vpd_fruit2 = Math.max(0, es_fruit - ea2);
+
+      // 교차진단/SSI/CCI
+      const diag = crossDiagnosis(eth, voc, co2, vpd_fruit2, band, health, cons);
+      const ssi = computeSSI(eth, voc, co2, vpd_fruit2, band, diag.level);
+      const learning = clamp(50 + 0.25*health + 0.25*cons, 0, 100);
+      const cci = computeCCI(vpd_fruit2, band, ssi, learning);
+      const cciTag = cciLabel(cci.total);
+
+      // 감모/잔여
+      const lossDay = estimateLossDayPercent(vpd_fruit2, vpdTarget, betaBase, alphaDry);
+      const loss7 = estimateLossNDays(lossDay, 7);
+      const loss14 = estimateLossNDays(lossDay, 14);
+      const remainDays = estimateRemainingDays(lossLimit, lossDay);
+
+      // 고장/제상
+      const coldArea = clamp(num(document.getElementById("in_coldArea").value, 10), 0, 100);
+      const sigmaT = clamp(num(document.getElementById("in_sigmaT").value, 0.8), 0, 10);
+      const dCold = clamp(num(document.getElementById("in_dColdArea").value, 1.0), 0, 50);
+      const coolingRate = clamp(num(document.getElementById("in_coolingRate").value, 0.08), 0, 1);
+      const cycleDur = clamp(num(document.getElementById("in_cycleDur").value, 6.0), 0, 60);
+      const overshoot = clamp(num(document.getElementById("in_overshoot").value, 0.4), 0, 10);
+
+      const efs = computeEFS(coldArea, sigmaT, dCold);
+      const pri = computePRI(coolingRate, cycleDur, overshoot);
+      const fault = judgeFault(efs, pri);
+
+      // 리스크
+      const risk = computeRiskScore(diag, vpd_fruit2, band, lossDay, lossLimit, efs, pri, health, cons);
+      const rTag = riskLabel(risk.total);
+
+      // 앱용 권고 요약
+      const reco = recommendSimple(diag, vpd_fruit2, band, remainDays, fault.level);
+
+      // -------------------------
+      // 홈 출력
+      // -------------------------
+      document.getElementById("v_risk_total").textContent = String(Math.round(risk.total));
+      document.getElementById("v_cci_total").textContent = String(Math.round(cci.total));
+      document.getElementById("sub_cci").textContent = `Env ${Math.round(cci.env)} · Grade ${Math.round(cci.grade)} · Learning ${Math.round(cci.learn)} (${cciTag.txt})`;
+
+      document.getElementById("v_t_air").textContent = T_air.toFixed(1);
+      document.getElementById("v_rh").textContent = RH.toFixed(1);
+
+      let vpdStateTxt = "적정(OK)";
+      if(vpd_fruit2 > band.hi) vpdStateTxt = "건조(Dry)";
+      else if(vpd_fruit2 < band.lo) vpdStateTxt = "습함(Wet)";
+      document.getElementById("v_vpd_state").textContent = vpdStateTxt;
+      document.getElementById("v_vpd_fruit").textContent = vpd_fruit2.toFixed(3);
+
+      document.getElementById("v_remain_days").textContent = (remainDays >= 999 ? "99+" : String(Math.round(remainDays)));
+      document.getElementById("sub_remain").textContent = `임계 ${lossLimit.toFixed(1)}% 도달 예상 · 일일 감모 ${lossDay.toFixed(3)}%/day`;
+      document.getElementById("v_reco_mode").textContent = reco.mode;
+      document.getElementById("sub_reco").textContent = `진단: ${diag.state} · 제상/고장: ${fault.state}`;
+      setNote(document.getElementById("noteOneLine"), reco.level, reco.oneLine);
+
+      document.getElementById("badgeHome").textContent = `${rTag.txt} ${Math.round(risk.total)}/100`;
+      setCardState(document.getElementById("cardRiskHome"), rTag.level);
+      setCardState(document.getElementById("cardCciHome"), cciTag.level);
+
+      // 상단 리스크 pill
+      document.getElementById("txtRisk").textContent = `${rTag.txt} ${Math.round(risk.total)}`;
+      setDot(document.getElementById("dotRisk"), rTag.level);
+      document.getElementById("pillRisk").style.borderColor =
+        (rTag.level === "OK") ? "rgba(34,197,94,.30)" :
+        (rTag.level === "WARN") ? "rgba(245,158,11,.30)" :
+        (rTag.level === "BAD") ? "rgba(239,68,68,.30)" :
+        "rgba(59,130,246,.30)";
+
+      // -------------------------
+      // 환경 출력
+      // -------------------------
+      document.getElementById("v_es_air").textContent = es_air.toFixed(3);
+      document.getElementById("v_ea").textContent = ea2.toFixed(3);
+      document.getElementById("v_es_fruit").textContent = es_fruit.toFixed(3);
+
+      document.getElementById("v_vpd_fruit2").textContent = vpd_fruit2.toFixed(3);
+      document.getElementById("v_band2").textContent = `${band.lo.toFixed(2)}~${band.hi.toFixed(2)}`;
+      document.getElementById("v_target2").textContent = vpdTarget.toFixed(2);
+
+      const vpdMax = 0.60; // 게이지 스케일(데모)
+      const pct = clamp((vpd_fruit2 / vpdMax) * 100, 0, 100);
+      document.getElementById("barVpd").style.width = `${pct}%`;
+
+      let envBadge = "VPD OK";
+      let envLevel = "OK";
+      if(vpd_fruit2 > band.hi){ envBadge="VPD DRY"; envLevel="WARN"; }
+      else if(vpd_fruit2 < band.lo){ envBadge="VPD WET"; envLevel="WARN"; }
+      document.getElementById("badgeEnv").textContent = envBadge;
+      setCardState(document.getElementById("cardGauge"), envLevel);
+
+      document.getElementById("v_loss_day").textContent = lossDay.toFixed(3);
+      document.getElementById("v_loss_7").textContent = loss7.toFixed(2);
+      document.getElementById("v_loss_14").textContent = loss14.toFixed(2);
+      document.getElementById("v_remain_days2").textContent = (remainDays >= 999 ? "99+" : String(Math.round(remainDays)));
+      document.getElementById("sub_remain2").textContent = `임계 ${lossLimit.toFixed(1)}% 기준`;
+
+      document.getElementById("sub_loss7").textContent = `임계 ${lossLimit.toFixed(1)}% 대비 ${(loss7-lossLimit>=0?"+":"")}${(loss7-lossLimit).toFixed(2)}%`;
+      document.getElementById("sub_loss14").textContent = `임계 ${lossLimit.toFixed(1)}% 대비 ${(loss14-lossLimit>=0?"+":"")}${(loss14-lossLimit).toFixed(2)}%`;
+
+      setCardState(document.getElementById("cardLossDay"), (lossDay <= 0.10 ? "OK" : (lossDay <= 0.20 ? "WARN" : "BAD")));
+      setCardState(document.getElementById("cardLoss7"), (loss7 <= lossLimit ? "OK" : (loss7 <= lossLimit*1.25 ? "WARN" : "BAD")));
+      setCardState(document.getElementById("cardLoss14"), (loss14 <= lossLimit*1.6 ? "OK" : (loss14 <= lossLimit*2.0 ? "WARN" : "BAD")));
+      setCardState(document.getElementById("cardRemain"), (remainDays >= 21 ? "OK" : (remainDays >= 10 ? "WARN" : "BAD")));
+
+      const envMsg =
+        `VPD_fruit ${vpd_fruit2.toFixed(3)} kPa · 목표 ${vpdTarget.toFixed(2)} · 밴드 ${band.lo.toFixed(2)}~${band.hi.toFixed(2)}. ` +
+        (vpd_fruit2 > band.hi ? "건조 구간: RH 상향(AWG) 또는 출하/회전으로 감모 리스크 제한 권장." :
+         vpd_fruit2 < band.lo ? "습윤 구간: 환기/Tempering/제상 타이밍 점검으로 결로 리스크 완화 권장." :
+                               "적정 구간: 현재는 감모와 습윤 사이 균형이 양호합니다.");
+      setNote(document.getElementById("noteEnv"), envLevel, envMsg);
+
+      // -------------------------
+      // 출하 출력
+      // -------------------------
+      const setpointNow = num(document.getElementById("in_setpoint").value, 2.0);
+      document.getElementById("v_setpoint_now").textContent = setpointNow.toFixed(1);
+
+      document.getElementById("v_t_out").textContent = (Dispatch.T_out === null) ? "--" : Dispatch.T_out.toFixed(1);
+      document.getElementById("v_t_dispatch_set").textContent = (Dispatch.T_out === null) ? "--" : Dispatch.T_dispatch_set.toFixed(1);
+      document.getElementById("v_ramp_rate").textContent = (Dispatch.T_out === null) ? "--" : Dispatch.rampRate_C_per_hr.toFixed(2);
+
+      document.getElementById("v_dispatch_state").textContent = Dispatch.enabled ? Dispatch.state : "OFF";
+      const dPct = Math.round(Dispatch.progress01 * 100);
+      document.getElementById("v_dispatch_pct").textContent = String(dPct);
+      document.getElementById("barDispatch").style.width = `${dPct}%`;
+
+      let dispatchBadge = "대기";
+      if(Dispatch.enabled){
+        dispatchBadge = (Dispatch.state === "HOLD") ? "완충 완료" : "진행";
+      }
+      document.getElementById("badgeDispatch").textContent = dispatchBadge;
+
+      const dispatchMsg = (Dispatch.T_out === null)
+        ? "외기 온도 입력 후 ‘계획 적용(Apply)’을 누르세요."
+        : `출하 계획: ${Dispatch.note}`;
+      setNote(document.getElementById("noteDispatch"),
+        Dispatch.enabled ? (Dispatch.state === "HOLD" ? "OK" : "WARN") : "INFO",
+        dispatchMsg
+      );
+      setCardState(document.getElementById("cardRamp"),
+        Dispatch.enabled ? (Dispatch.state === "HOLD" ? "OK" : "WARN") : "INFO"
+      );
+
+      // -------------------------
+      // 고장 출력
+      // -------------------------
+      document.getElementById("v_efs").textContent = String(Math.round(efs));
+      document.getElementById("v_pri").textContent = String(Math.round(pri));
+      document.getElementById("badgeFault").textContent = fault.state;
+      setNote(document.getElementById("noteFault"), fault.level, fault.msg);
+      setCardState(document.getElementById("cardEfs"), (efs >= 70 ? "WARN" : "OK"));
+      setCardState(document.getElementById("cardPri"), (pri >= 60 ? "WARN" : "OK"));
+
+      // -------------------------
+      // 제어 출력
+      // -------------------------
+      document.getElementById("v_setpoint_view").textContent = setpointNow.toFixed(1);
+      document.getElementById("v_awg_mode_view").textContent = awgMode;
+
+      // -------------------------
+      // 알람 생성(상태 변화 기반)
+      // -------------------------
+      const keyNow = [
+        diag.state, diag.level,
+        vpdStateTxt,
+        fault.state, fault.level,
+        rTag.txt,
+        reco.mode
+      ].join("|");
+
+      if(keyNow !== prevKey){
+        // 바뀐 순간에만 알람 기록(스팸 방지)
+        let lvl = "INFO";
+        let ttl = "상태 변경";
+        let msg = `${diag.state} · VPD ${vpdStateTxt} · Fault ${fault.state} · Reco ${reco.mode}`;
+
+        // 중요한 이벤트 우선
+        if(fault.level === "BAD"){ lvl="BAD"; ttl="고장 의심/긴급"; msg=fault.msg; }
+        else if(fault.level === "WARN"){ lvl="WARN"; ttl="제상/점검 주의"; msg=fault.msg; }
+        else if(diag.level === "BAD"){ lvl="BAD"; ttl="후숙/대사 위험"; msg=diag.msg; }
+        else if(diag.level === "WARN"){ lvl="WARN"; ttl="운영 주의"; msg=diag.msg; }
+        else if(diag.level === "INFO"){ lvl="INFO"; ttl="운영 점검"; msg=diag.msg; }
+        else{
+          lvl = (rTag.level === "OK") ? "OK" : (rTag.level === "WARN" ? "WARN" : "BAD");
+          ttl = `리스크 ${rTag.txt}`;
+          msg = reco.oneLine;
+        }
+
+        // 고장 ACK 직후에는 고장 알람을 너무 자주 올리지 않기(테스트 편의)
+        const nowTs = Date.now();
+        const ackBlock = (nowTs - Alarm.ackFaultTs) < 30_000; // 30초
+        if(!(ackBlock && (ttl.includes("고장") || ttl.includes("제상")))){
+          pushAlarm(lvl, ttl, msg);
+        }else{
+          // ACK 중이면 상단바만 최소 갱신
+          setAlarmBar("INFO", "알람 확인됨(ACK)", "30초 동안 고장/제상 알람 기록을 완화합니다.");
+        }
+
+        prevKey = keyNow;
+      }
+
+      // 홈 뱃지/상단바 최소 보정
+      document.getElementById("badgeHome").textContent = `${rTag.txt} ${Math.round(risk.total)}/100`;
+      saveState();
+    }
+
+    /* =========================
+       ###-------- 탭 전환 --------###
+    ========================= */
+    function showPage(name){
+      const map = {
+        Home:"pageHome",
+        Env:"pageEnv",
+        Dispatch:"pageDispatch",
+        Fault:"pageFault",
+        Control:"pageControl"
+      };
+      Object.values(map).forEach(id => document.getElementById(id).classList.remove("active"));
+      document.getElementById(map[name]).classList.add("active");
+
+      document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+      document.querySelector(`.tab[data-tab="${name}"]`).classList.add("active");
+
+      // 제어로 이동 버튼 시 스크롤 상단 정리
+      document.querySelector(".pages").scrollTop = 0;
+    }
+
+    document.querySelectorAll(".tab").forEach(t => {
+      t.addEventListener("click", () => showPage(t.getAttribute("data-tab")));
+    });
+
+    document.getElementById("btnOpenControl").addEventListener("click", () => showPage("Control"));
+
+    /* =========================
+       ###-------- 버튼 이벤트 --------###
+    ========================= */
+    document.getElementById("btnApplyHome").addEventListener("click", () => {
+      startOrUpdateDispatchPlan();
+      updateUI();
+    });
+
+    document.getElementById("btnResetHome").addEventListener("click", () => {
+      // 핵심 기본값
+      document.getElementById("in_t_air").value = "2.0";
+      document.getElementById("in_rh").value = "60.0";
+      document.getElementById("in_t_fruit").value = "4.0";
+      document.getElementById("in_vpd_target").value = "0.25";
+      document.getElementById("in_vpd_band").value = "0.20,0.35";
+      document.getElementById("in_awg_mode").value = "AUTO";
+
+      document.getElementById("in_eth").value = "0.72";
+      document.getElementById("in_voc").value = "132";
+      document.getElementById("in_co2").value = "940";
+      document.getElementById("in_health").value = "95";
+      document.getElementById("in_cons").value = "95";
+
+      document.getElementById("in_loss_limit").value = "5.0";
+      document.getElementById("in_beta_base").value = "0.06";
+      document.getElementById("in_alpha_dry").value = "1.2";
+      document.getElementById("in_setpoint").value = "2.0";
+
+      document.getElementById("in_t_out").value = "10.0";
+      document.getElementById("in_ship_hours").value = "4";
+      document.getElementById("in_crop_preset").value = "APPLE";
+      document.getElementById("in_dispatch_enable").value = "OFF";
+
+      document.getElementById("in_coldArea").value = "10";
+      document.getElementById("in_sigmaT").value = "0.8";
+      document.getElementById("in_dColdArea").value = "1.0";
+      document.getElementById("in_coolingRate").value = "0.080";
+      document.getElementById("in_cycleDur").value = "6.0";
+      document.getElementById("in_overshoot").value = "0.4";
+
+      document.getElementById("ctl_setpoint").value = "2.0";
+      document.getElementById("ctl_awg").value = "AUTO";
+
+      stopDispatch();
+      Alarm.list = [];
+      renderAlarmList();
+      setAlarmBar("INFO", "알람", "기본값으로 초기화했습니다.");
+      prevKey = "";
+      updateUI();
+    });
+
+    document.getElementById("btnDispatchApply").addEventListener("click", () => {
+      startOrUpdateDispatchPlan();
+      updateUI();
+      pushAlarm("INFO", "출하 계획 적용", Dispatch.note || "출하 계획을 갱신했습니다.");
+    });
+    document.getElementById("btnDispatchStop").addEventListener("click", () => {
+      document.getElementById("in_dispatch_enable").value = "OFF";
+      stopDispatch();
+      updateUI();
+      pushAlarm("INFO", "출하 중지", "출하 모드를 중지했습니다.");
+    });
+
+    document.getElementById("btnRunDefrost").addEventListener("click", () => {
+      pushAlarm("INFO", "제상 실행(테스트)", "제상 명령을 실행했다고 가정합니다(테스트).");
+      setAlarmBar("INFO", "제상 실행(테스트)", "실제 장치 연동 시 API 명령 전송으로 교체됩니다.");
+    });
+    document.getElementById("btnAckFault").addEventListener("click", () => {
+      Alarm.ackFaultTs = Date.now();
+      pushAlarm("OK", "알람 확인(ACK)", "고장/제상 알람을 확인 처리했습니다(30초 완화).");
+    });
+
+    document.getElementById("btnCtlApply").addEventListener("click", () => {
+      // 제어는 테스트에서는 “입력값에 반영 + 로그”
+      const sp = num(document.getElementById("ctl_setpoint").value, 2.0);
+      const awg = document.getElementById("ctl_awg").value;
+
+      document.getElementById("in_setpoint").value = sp.toFixed(1);
+      document.getElementById("in_awg_mode").value = awg;
+
+      addControlLog(`제어 적용(테스트): Setpoint=${sp.toFixed(1)}°C, AWG=${awg}`);
+      pushAlarm("INFO", "제어 적용", `Setpoint ${sp.toFixed(1)}°C · AWG ${awg}`);
+      updateUI();
+    });
+
+    document.getElementById("btnVent").addEventListener("click", () => {
+      addControlLog("환기 실행(테스트): 팬/댐퍼 ON 명령 가정");
+      pushAlarm("INFO", "환기 실행(테스트)", "환기 명령을 실행했다고 가정합니다(테스트).");
+    });
+
+    document.getElementById("btnDefrost").addEventListener("click", () => {
+      addControlLog("제상 실행(테스트): Defrost ON 명령 가정");
+      pushAlarm("INFO", "제상 실행(테스트)", "제상 명령을 실행했다고 가정합니다(테스트).");
+    });
+
+    document.getElementById("btnClearLog").addEventListener("click", () => {
+      document.getElementById("noteControl").textContent = "제어 로그가 여기에 쌓입니다.";
+      pushAlarm("OK", "로그 초기화", "제어 로그를 초기화했습니다.");
+    });
+
+    function addControlLog(line){
+      const el = document.getElementById("noteControl");
+      const ts = nowTimeString();
+      const cur = el.textContent.trim();
+      const base = (cur === "제어 로그가 여기에 쌓입니다.") ? "" : cur + "\n";
+      el.textContent = base + `[${ts}] ${line}`;
+    }
+
+    /* =========================
+       ###-------- 입력 변화 시 즉시 반영 --------###
+    ========================= */
+    const inputs = [
+      "in_t_air","in_rh","in_t_fruit","in_vpd_target","in_vpd_band","in_awg_mode",
+      "in_eth","in_voc","in_co2","in_health","in_cons",
+      "in_loss_limit","in_beta_base","in_alpha_dry","in_setpoint",
+      "in_t_out","in_ship_hours","in_crop_preset","in_dispatch_enable",
+      "in_coldArea","in_sigmaT","in_dColdArea","in_coolingRate","in_cycleDur","in_overshoot"
+    ];
+    inputs.forEach(id => {
+      const el = document.getElementById(id);
+      if(!el) return;
+      el.addEventListener("input", () => { updateUI(); });
+      el.addEventListener("change", () => { updateUI(); });
+    });
+
+    /* =========================
+       ###-------- 초기화 & 루프 --------###
+    ========================= */
+    loadState();
+    renderAlarmList();
+    prevKey = "";
+
+    function loop(){
+      updateUI();
+      requestAnimationFrame(loop);
+    }
+    loop();
+  </script>
+</body>
+</html>
